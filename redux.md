@@ -280,8 +280,111 @@ export default function () {
 ### **Middleware when not using redux-toolkit:**
 
 ```javascript
-import {createStore, applyMiddleware} from 'redux';
-import  reducer from './store/reducer';
+import { createStore, applyMiddleware } from 'redux';
+import reducer from './store/reducer';
 
-const store = createStore(reducer,applyMiddleware(logger))
+const store = createStore(reducer, applyMiddleware(logger));
+```
+
+### **Consuming APIs in Redux:**
+
+We are not supposed to call API's in our reducers. Because our reducers should be pure. They should get the current state, and return the new state. Nothing more, no side effect, No APIs, No DOM manipulation, no state mutation.
+
+So, where exactly should we put code with side effect?
+
+In our `actionCreators`.
+
+Traditionally, `actionCreator` return an object, but with the thunk middleware, we can return a fucntion form our action creator. and this function is where we can encapsulate code with side effect.
+
+```javascript
+function actionCreator() {
+  return function (dispatch, getstate) {
+    //side effect code...
+  };
+}
+```
+
+If we don't need to lookup to the state just remove the second parameter and also we can write this function as a arrow function.
+
+```javascript
+function actionCreator() {
+  return (dispatch) {
+    //side effect code...
+  };
+}
+```
+
+**Curried version:**
+
+```javascript
+const actionCreator = () => (dispatch) => {
+  // Call an API
+  //Resolved: dispatch(success)
+  //Rejected: dispatch(error)
+};
+```
+
+But there is a problem with is pattern. The problem is that it become very repetitive. As we implement more features in our application. Everytime we need to talk to the server, we need to follow these three steps, you have to make an API call and handle the resolved and rejected case.
+
+This is where we can use middleware, we can implement the structure with a middleware function.
+
+### **Executing API middleware:**
+
+1. Create a file in the `middleware` folder with the name `api.js`
+
+`api.js` file
+
+```javascript
+const action = {
+  type: 'apiRequest',
+  payload: {
+    url: '/bugs',
+    method: 'get',
+    data: {},
+    onSuccess: 'bugReceived',
+    onError: 'apiCallFailed'
+  }
+}
+const api = ({dispatch}) => next => async action {
+  if(action.type !== 'apiRequest'){
+    return next(action);
+  }
+
+  // Three steps:
+  // 1. API call
+  // 2. Handle resolved case
+  // 3. Handle rejecte case
+
+  const {url, method, data, onSuccess, onError} = action.payload;
+
+try{
+  const response = await axios.request({
+    baseURL: 'https://localhost:9001/api',
+    url,
+    method,
+    data,
+});
+dispatch({type: onSuccess, payload: response.data})
+}catch(error){
+dispatch({type: onError, payload: error})
+}
+.then().catch()
+}
+export default api;
+```
+
+2. Add `api.js` file in the `configureStore` file:
+
+```javascript
+import { configureStore } from '@reduxjs/toolkit';
+import logger from '/middleware/logger';
+import api from '/middleware/api';
+
+export default function () {
+  return configureStore({
+    reducer,
+    middleware: [logger],
+    api,
+  });
+}
 ```
