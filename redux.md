@@ -130,3 +130,158 @@ const slice = createSlice({
   },
 });
 ```
+
+## **Design Redux Store:**
+
+### **Redux State vs Local State**
+
+| Store Global data in redux | Store all data in redux |
+| -------------------------- | :---------------------: |
+| Esay to Implement          |   Unifies data access   |
+|                            |      Cacheability       |
+|                            |     Easier to debug     |
+|                            |   More testable code    |
+
+**Exception: `Form State`**
+
+- Temprory values
+- Too many dispatches
+- Harder to debugging
+
+> The more state we put in the store. The more we can get out of redux.
+
+### **Structuring a Redux Store Best Practices:**
+
+Two type of structure:
+
+- Array of object.
+- Using Object.
+
+**Object provides fast lookUps, but they don't preserve order**.
+
+**and Array is slow but its provide order.**
+
+> So, If we need for fast lookups, use object.and If we need ordered data, use an array.
+
+If we have multiple slices in the store:
+
+**For Example:**
+
+- bug: [ ]
+- project: [ ]
+- tags: [ ]
+
+> Then it a good practice to put these slices under the parent slice called `entities`.
+
+> And the another top level slice called `auth` which include the data about the current user such as username, ID, authentication.
+
+> We have another top level slice called `UI` and this is where we can store state specific to certain page or component.
+
+```javascript
+{
+  entities: {...},
+  auth: {userId: 1, name: "Faisal"},
+  UI: {
+    bugs: {query: "", sortBy: ""}
+  }
+}
+```
+
+### **Combining Reducers:**
+
+Combining reducer multiple reducer, So we can create a store with multiple slices.
+
+`Create a reducer.js File:`
+
+```javascript
+import {combineReducers} from redux;
+import bugsReducer from './bugs';
+import projectReducer from './projects';
+
+3xport default combineReducers({
+  bugs: bugsReducer,
+  projects: projectReducer,
+})
+```
+
+Then goto: `store folder`:
+
+```javascript
+import reducer from 'reducer';
+```
+
+> So by combining these reducer, we are essentially creating a hierarchy of reducer function. At the top, we have the root reducer. and this is the reducer that our store talk to.
+
+![alt text](image/../images/storeCombining.PNG)
+
+If we dispatch an `action` our store passes that action to the root reducer. This root reducer will then pass that action to each child reducer.
+
+### Normalization:
+
+Another important principle to designa `Redux Store` is `Normalzation`. Normalization is basically means that we should not duplicate data in our store.
+
+## **What is Middleware?**
+
+When we dispatching action, you're essentially sending them through a single entry point.
+
+![alt text](image/../images/middleware_1.PNG)
+
+Now on the other side of the entry point, we have our reducer. So, when we dispatch an action, it goes through this pipeline, and reaches it then reaches it to the root reducer.
+The root reducer will then pass this action to his child reducers.
+
+Now, in this pipeline, we add function that would get executed an action is dispatched. This is what we call middleware because it sit in the middle.
+
+`So, middleware is the piece if code that gets executed after an action is dispatched, and before it reaches to the root reducer.`
+
+![middleware](images/../images/middleware_2.PNG)
+
+**Middleware:**
+
+- Calling APIs
+- Error Reporting
+- Analytics
+- Authorization
+
+### **How to create middleware function:**
+
+- creating `middleware` folder in the `store` folder.
+- create a middleware function inside `middleware` folder: such as `logger.js`.
+
+This fucntion having three parameters:
+
+- **action**: Action is the action that was dispatched.
+- **next**: Next reference to the next middleware funciton. If this is the only middleware fucntion we have, next is going to be the reducer that is going to handle this action
+
+```javascript
+// curried version of the fucntion...
+const logger = store => next => action {
+  console.log("Store", store)
+  console.log("Next", next)
+  console.log("Action", action)
+  next(action); //if we don't call next() the action is not going to be processed furthur.
+}
+export default logger;
+```
+
+Now in the configureStore File, the function take the configuration parameter. So in the object, we're specifying our reducer. and now, we can also specify our middleware functions
+
+```javascript
+import { configureStore } from '@reduxjs/toolkit';
+import logger from '/middleware/logger';
+
+export default function () {
+  return configureStore({
+    reducer,
+    middleware: [logger],
+  });
+}
+```
+
+### **Middleware when not using redux-toolkit:**
+
+```javascript
+import {createStore, applyMiddleware} from 'redux';
+import  reducer from './store/reducer';
+
+const store = createStore(reducer,applyMiddleware(logger))
+```
