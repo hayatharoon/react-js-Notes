@@ -498,7 +498,7 @@ describe('isEven', () => {
 
 We called these test as `solitary` or `lonely` test. But this is the poor way to test your redux application. **Because it test the implementation of the application not actually the behaviour of the application.**
 
-So to test a Redux application, we should test  these building blocks together. We dispatch an action and check the state of the store. And we call  these test, Social test.
+So to test a Redux application, we should test these building blocks together. We dispatch an action and check the state of the store. And we call these test, Social test.
 
 Test that involves multiple functions or object working together.
 
@@ -507,7 +507,4 @@ Test that involves multiple functions or object working together.
 - Less Fragile
 - Cheaper to write
 - Cheaper to maintain
-- More reliable 
-
-## **Solitary Test Example:**
-
+- More reliable
