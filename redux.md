@@ -388,3 +388,126 @@ export default function () {
   });
 }
 ```
+
+## **Automated Testing:**
+
+Automated testing is about write code to test our code.  
+**Types of Tests:**
+
+- Unit test
+- Integration test
+- End-to-End tests.
+
+### **1. Unit Test**
+
+Unit test involves testing the application without its external dependencies, such as files, database, and web services.
+
+When writing unit tests, we provide mock or fake objects that mimic this external resources.
+
+unit test is super fast.
+
+`API Code ------> Mock API -------> API`
+
+### **Integration test:**
+
+Integration test is a test to to write a bunch of test that test our application along with external resources.
+
+These test are slowe than unit test, but gives us more confident about our application.
+
+### **End-to-End Test:**
+
+End-to-End test involving launching our application and driving it through its user interface. These test gives us the more confidence, but they're also the slowest and the most fragile because a simple change in the application user interface can easily break serveral end to end tests.
+
+## **Setup Testing Envirnoment:**
+
+**Step 1:**
+Install all these libraries:
+`npm i jest @types/jest @babel/core @babel/preset-env babel-jest -D`
+
+**Step 2:**
+Goto the root of the project and create the file with the name: `babel.config.json`.
+
+`babel.config.json` File:
+
+```json
+{
+  "presets": ["@babel/preset-env"]
+}
+```
+
+**Step 3:**
+Create a file inside `src` folder:
+called `math.spec.js`:
+
+> If a file have `spec` in has name its means that it is `test` file.
+
+```json
+it("First test:", ()=>{})
+```
+
+Then open the `terminal` and type `jest`.
+
+**Step 4:**
+Open the `package.json` file:
+
+```json
+"scripts":{
+  "test":"jest --watch"
+}
+```
+
+Then write `npm test` in the terminal.
+
+## **Writing our first Unit Test:**
+
+```javascript
+it('isEven should return true if given number is even:', () => {
+  const result = isEven(2);
+  expect(result).toEqual(true);
+});
+
+it('isEven should return false id given number is odd:', () => {
+  const result = isEven(3);
+  expect(result).toEqual(false);
+});
+```
+
+With `it()` we define a single unit test.
+
+```javascript
+describe('isEven', () => {
+  it('isEven should return true if given number is even:', () => {
+    const result = isEven(2);
+    expect(result).toEqual(true);
+  });
+
+  it('isEven should return false id given number is odd:', () => {
+    const result = isEven(3);
+    expect(result).toEqual(false);
+  });
+});
+```
+
+`describe()` is used to bundled multiple test cases.
+
+## **Unit testing with Redux Application:**
+
+1. One way to unit test a redux application is to test its individual building blocks in isolation.
+
+![Testing](image/../images/testing.PNG)
+
+We called these test as `solitary` or `lonely` test. But this is the poor way to test your redux application. **Because it test the implementation of the application not actually the behaviour of the application.**
+
+So to test a Redux application, we should test  these building blocks together. We dispatch an action and check the state of the store. And we call  these test, Social test.
+
+Test that involves multiple functions or object working together.
+
+**Social Test:**
+
+- Less Fragile
+- Cheaper to write
+- Cheaper to maintain
+- More reliable 
+
+## **Solitary Test Example:**
+
